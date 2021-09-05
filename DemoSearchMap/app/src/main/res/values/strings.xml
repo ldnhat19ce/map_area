@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">DemoSearchMap</string>
+    <string name="ed_province">Tỉnh/Thành phố</string>
+    <string name="search_title">Chọn khu vực cần tìm</string>
+    <string name="ed_district">Quận/huyện</string>
+    <string name="ed_sub_district">Phường/xã</string>
+    <string name="apply">ÁP DỤNG</string>
+    <string name="choose_province">Chọn Tỉnh/Thành phố</string>
+    <string name="choose_district">Chọn Quận/Huyện</string>
+    <string name="choose_subdistrict">Chọn Phường/Xã</string>
+    <string name="select_area">Chọn khu vực</string>
+</resources>
