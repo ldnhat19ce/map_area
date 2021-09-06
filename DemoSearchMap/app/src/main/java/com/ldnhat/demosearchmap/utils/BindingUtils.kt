@@ -1,5 +1,7 @@
 package com.ldnhat.demosearchmap.utils
 
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -8,6 +10,8 @@ import androidx.databinding.BindingAdapter
 import com.google.android.material.textfield.TextInputEditText
 import com.ldnhat.demosearchmap.R
 import com.ldnhat.demosearchmap.model.CountryDetail
+import io.reactivex.rxjava3.subjects.BehaviorSubject
+import io.reactivex.rxjava3.subjects.PublishSubject
 
 @BindingAdapter("textCountryDetail")
 fun textCountryDetail(textView: TextView, countryDetail: CountryDetail?){
@@ -36,3 +40,19 @@ fun textInputState(textInputEditText: TextInputEditText, boolean: Boolean?){
     }
 }
 
+@BindingAdapter("editTextListner")
+fun editTextListener(editText: EditText, subject: BehaviorSubject<CharSequence>){
+    editText.addTextChangedListener(object : TextWatcher{
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+        }
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            subject.onNext(s)
+        }
+
+        override fun afterTextChanged(s: Editable?) {
+
+        }
+    })
+}

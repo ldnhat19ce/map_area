@@ -15,7 +15,10 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
+import org.apache.commons.lang3.StringUtils
 import java.lang.Exception
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.jvm.internal.Intrinsics
 
 class CountryViewModel : ViewModel() {
@@ -38,6 +41,11 @@ class CountryViewModel : ViewModel() {
     val countryDetail:LiveData<MutableList<CountryDetail>>
         get() = _countryDetail
 
+    private val _countryDetailSearch = MutableLiveData<MutableList<CountryDetail>>()
+
+    val countryDetailSearch:LiveData<MutableList<CountryDetail>>
+    get() = _countryDetailSearch
+
     private val _type = MutableLiveData<Type>()
 
     val type:LiveData<Type>
@@ -45,16 +53,22 @@ class CountryViewModel : ViewModel() {
 
     private val _provinceCode = MutableLiveData<String>()
     private val _districtCode = MutableLiveData<String>()
-
-
+    val rxSearchCountryDetail = BehaviorSubject.create<CharSequence>()
 
     init {
         handleTypeOfCountry()
         onCloseButtonClick()
-
+        addSearchCountryDetail()
     }
 
-
+    private fun addSearchCountryDetail(){
+        rxSearchCountryDetail.observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
+            .subscribe {
+                println(it)
+                filterArea(it)
+            }.addTo(compositeDisposable)
+    }
 
     private fun onCloseButtonClick(){
         closeButtonClick.observeOn(AndroidSchedulers.mainThread())
@@ -70,6 +84,26 @@ class CountryViewModel : ViewModel() {
 
     fun onCloseButtonClickSuccess(){
         closeButtonClick.onNext(false)
+
+    }
+
+    private fun filterArea(keyword : CharSequence){
+        val areaFilter:MutableList<CountryDetail> = ArrayList()
+
+        if (keyword.isNotBlank()){
+            countryDetail.value?.let {
+                for (countryDetail : CountryDetail in it){
+                    if (StringUtils.contains(StringUtils.toRootLowerCase(countryDetail.name),
+                            StringUtils.toRootLowerCase(keyword.toString()))){
+                        println(countryDetail.name)
+                        areaFilter.add(countryDetail)
+                    }
+                }
+            }
+        }else{
+            countryDetail.value?.let { areaFilter.addAll(it) }
+        }
+        _countryDetailSearch.postValue(areaFilter)
 
     }
 
@@ -97,12 +131,13 @@ class CountryViewModel : ViewModel() {
         println("status: "+resource.status)
         if (countryDetail?.result != null){
             _countryDetail.value = countryDetail.result
+            _countryDetailSearch.value = countryDetail.result
         }else{
             _countryDetail.value = null
         }
     }
 
-    fun getAllDistrict(provinceCode : String){
+    private fun getAllDistrict(provinceCode : String){
         repository.findAllDistrict(compositeDisposable, provinceCode).observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
             .subscribe {
@@ -114,12 +149,13 @@ class CountryViewModel : ViewModel() {
         val districts:ApiResponse<MutableList<CountryDetail>>? = resource.data
         if (districts?.result != null){
             _countryDetail.value = districts.result
+            _countryDetailSearch.value = districts.result
         }else{
             _countryDetail.value = null
         }
     }
 
-    fun getAllSubDistrict(districtCode : String){
+    private fun getAllSubDistrict(districtCode : String){
         repository.findAllSubDistrict(compositeDisposable, districtCode).observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
             .subscribe {
@@ -131,6 +167,7 @@ class CountryViewModel : ViewModel() {
         val subDistricts:ApiResponse<MutableList<CountryDetail>>? = resource.data
         if (subDistricts?.result != null){
             _countryDetail.value = subDistricts.result
+            _countryDetailSearch.value = subDistricts.result
         }else{
             _countryDetail.value = null
         }

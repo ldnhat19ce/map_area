@@ -9,6 +9,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 
 class SearchViewModel : ViewModel() {
@@ -80,6 +81,8 @@ class SearchViewModel : ViewModel() {
 
     val stateButton:LiveData<Boolean>
     get() = _stateButton
+
+
 
     init {
         backClick()

@@ -89,7 +89,7 @@ class FragmentCountry : DialogFragment() {
 
         binding.rvSearch.adapter = adapter
 
-        viewModel.countryDetail.observe(viewLifecycleOwner, {
+        viewModel.countryDetailSearch.observe(viewLifecycleOwner, {
             if (it != null){
                 adapter.submitList(it)
             }
