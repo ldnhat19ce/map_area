@@ -3,6 +3,7 @@ package com.ldnhat.demosearchmap.ui.search
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ldnhat.demosearchmap.R
@@ -33,12 +34,12 @@ class SearchActivity : AppCompatActivity(), UpdateCountry {
             }
         })
 
-
         showCountryDetail()
         handleStateTextInput()
 
         viewModel.stateButton.observe(this, {
             if (it){
+                binding.btnSearch.setBackgroundColor(ContextCompat.getColor(this, R.color.blue))
                 binding.btnSearch.setOnClickListener {
                     val intent = Intent()
                     val bundle = Bundle()
@@ -49,6 +50,8 @@ class SearchActivity : AppCompatActivity(), UpdateCountry {
                     setResult(33, intent)
                     finish()
                 }
+            }else{
+                binding.btnSearch.setBackgroundColor(ContextCompat.getColor(this, R.color.dimgray))
             }
             viewModel.handleStateButton()
         })

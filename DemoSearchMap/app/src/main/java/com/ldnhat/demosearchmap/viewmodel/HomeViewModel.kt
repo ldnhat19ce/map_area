@@ -1,17 +1,16 @@
 package com.ldnhat.demosearchmap.viewmodel
 
 import android.app.Application
-import android.content.Context
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.ldnhat.demosearchmap.R
-import com.ldnhat.demosearchmap.model.ApiResponse
 import com.ldnhat.demosearchmap.model.CountryDetail
-import com.ldnhat.demosearchmap.repository.CountryRepository
-import com.ldnhat.demosearchmap.repository.CountryRepositoryImpl
-import com.ldnhat.demosearchmap.repository.Resource
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.functions.Function3
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.PublishSubject
@@ -55,11 +54,31 @@ class HomeViewModel(app: Application) : AndroidViewModel(app){
 
 
     init {
+        zip()
         onButtonSearchClick()
-        addProvinceState()
-        addDistrictState()
-        addSubDistrictState()
+//        addProvinceState()
+//        addDistrictState()
+//        addSubDistrictState()
         _textArea.value = app.getString(R.string.search_title)
+
+    }
+    
+    private fun zip(){
+        Observable.combineLatest(rxProvince, rxDistrict, rxSubDistrict){
+            zProvince, zDistrict, zSubDistrict ->
+            if (zProvince.id != null && zDistrict.id == null && zSubDistrict.id == null){
+                "${zProvince.name}"
+            }else if (zProvince.id != null && zDistrict.id != null && zSubDistrict.id == null){
+                "${zDistrict.name}, ${zProvince.name}"
+            }else{
+                "${zProvince.name}, ${zDistrict.name}, ${zSubDistrict.name}"
+            }
+        }.subscribe ({
+            println("test: $it")
+            _textArea.value = it
+        }, {
+            it.printStackTrace()
+        }).addTo(compositeDisposable)
     }
 
     private fun addProvinceState(){
@@ -67,7 +86,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app){
             .subscribeOn(Schedulers.io())
             .subscribe {
                 println(it.name)
-                _province.postValue(it)
+
             }.addTo(compositeDisposable)
     }
 
@@ -84,24 +103,28 @@ class HomeViewModel(app: Application) : AndroidViewModel(app){
             .subscribeOn(Schedulers.io())
             .subscribe {
                 _subDistrict.postValue(it)
+
             }.addTo(compositeDisposable)
     }
 
     fun handleArea(province : CountryDetail, district : CountryDetail, subDistrict : CountryDetail){
-        println("province: "+province.name+" district: "+district.name+" subdistrict: "+subDistrict.name)
+        //println("province: "+province.name+" district: "+district.name+" subdistrict: "+subDistrict.name)
 
         if (province.id != null && district.id == null && subDistrict.id == null){
             rxProvince.onNext(province)
-            _textArea.value = province.name
+            rxDistrict.onNext(CountryDetail())
+            rxSubDistrict.onNext(CountryDetail())
+            //_textArea.value = this.province.value?.name
         }else if (province.id != null && district.id != null && subDistrict.id == null){
             rxProvince.onNext(province)
             rxDistrict.onNext(district)
-            _textArea.value = province.name+", "+district.name
+            rxSubDistrict.onNext(CountryDetail())
+            //_textArea.value = province.name+", "+district.name
         }else if (province.id != null && district.id != null && subDistrict.id != null){
             rxProvince.onNext(province)
             rxDistrict.onNext(district)
             rxSubDistrict.onNext(subDistrict)
-            _textArea.value = province.name+", "+district.name+", "+subDistrict.name
+            //_textArea.value = province.name+", "+district.name+", "+subDistrict.name
         }
     }
 
