@@ -27,6 +27,8 @@ class SearchActivity : AppCompatActivity(), UpdateCountry {
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
 
+        getDataFromHome()
+
         viewModel.backClick.observe(this, {
             if (it){
                 onBackPressed()
@@ -131,5 +133,26 @@ class SearchActivity : AppCompatActivity(), UpdateCountry {
 
     override fun dataListener(type: Type, countryDetail: CountryDetail) {
         viewModel.handleCountryDetail(type, countryDetail)
+    }
+
+    private fun getDataFromHome(){
+
+        val intent = intent
+
+        val bundle = intent?.getBundleExtra("BUNDLE")
+        val province: CountryDetail? = bundle?.getParcelable("PROVINCE")
+
+        var district = CountryDetail()
+        if (bundle?.getParcelable<CountryDetail>("DISTRICT") != null){
+            district = bundle.getParcelable("DISTRICT")!!
+        }
+
+        var subDistrict = CountryDetail()
+        if (bundle?.getParcelable<CountryDetail>("SUBDISTRICT") != null){
+            subDistrict = bundle.getParcelable("SUBDISTRICT")!!
+        }
+        if (province != null) {
+            viewModel.getCountryDetail(province, district, subDistrict)
+        }
     }
 }

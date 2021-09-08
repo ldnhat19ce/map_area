@@ -215,6 +215,12 @@ class SearchViewModel : ViewModel() {
         }
     }
 
+    fun getCountryDetail(province : CountryDetail, district : CountryDetail, subDistrict : CountryDetail){
+        _provinceCountryDetail.postValue(province)
+        _districtCountryDetail.postValue(district)
+        _subDistrictCountryDetail.postValue(subDistrict)
+    }
+
     override fun onCleared() {
         super.onCleared()
         compositeDisposable.clear()

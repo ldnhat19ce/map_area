@@ -56,15 +56,12 @@ class HomeViewModel(app: Application) : AndroidViewModel(app){
     init {
         zip()
         onButtonSearchClick()
-//        addProvinceState()
-//        addDistrictState()
-//        addSubDistrictState()
         _textArea.value = app.getString(R.string.search_title)
 
     }
     
     private fun zip(){
-        Observable.combineLatest(rxProvince, rxDistrict, rxSubDistrict){
+        Observable.zip(rxProvince, rxDistrict, rxSubDistrict) {
             zProvince, zDistrict, zSubDistrict ->
             if (zProvince.id != null && zDistrict.id == null && zSubDistrict.id == null){
                 "${zProvince.name}"
@@ -81,31 +78,6 @@ class HomeViewModel(app: Application) : AndroidViewModel(app){
         }).addTo(compositeDisposable)
     }
 
-    private fun addProvinceState(){
-        rxProvince.observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.io())
-            .subscribe {
-                println(it.name)
-
-            }.addTo(compositeDisposable)
-    }
-
-    private fun addDistrictState(){
-        rxDistrict.observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.io())
-            .subscribe {
-                _district.postValue(it)
-            }.addTo(compositeDisposable)
-    }
-
-    private fun addSubDistrictState(){
-        rxSubDistrict.observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.io())
-            .subscribe {
-                _subDistrict.postValue(it)
-
-            }.addTo(compositeDisposable)
-    }
 
     fun handleArea(province : CountryDetail, district : CountryDetail, subDistrict : CountryDetail){
         //println("province: "+province.name+" district: "+district.name+" subdistrict: "+subDistrict.name)
@@ -114,18 +86,18 @@ class HomeViewModel(app: Application) : AndroidViewModel(app){
             rxProvince.onNext(province)
             rxDistrict.onNext(CountryDetail())
             rxSubDistrict.onNext(CountryDetail())
-            //_textArea.value = this.province.value?.name
         }else if (province.id != null && district.id != null && subDistrict.id == null){
             rxProvince.onNext(province)
             rxDistrict.onNext(district)
             rxSubDistrict.onNext(CountryDetail())
-            //_textArea.value = province.name+", "+district.name
         }else if (province.id != null && district.id != null && subDistrict.id != null){
             rxProvince.onNext(province)
             rxDistrict.onNext(district)
             rxSubDistrict.onNext(subDistrict)
-            //_textArea.value = province.name+", "+district.name+", "+subDistrict.name
         }
+        _province.value = province
+        _district.value = district
+        _subDistrict.value = subDistrict
     }
 
     private fun onButtonSearchClick(){

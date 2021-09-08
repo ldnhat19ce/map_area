@@ -31,7 +31,14 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
 
         viewModel.buttonClick.observe(this, {
             if (it){
-                startActivityForResult(Intent(this, SearchActivity::class.java), 33)
+                val intent = Intent(this, SearchActivity::class.java)
+
+                val bundle = Bundle()
+                bundle.putParcelable("PROVINCE", viewModel.province.value)
+                bundle.putParcelable("DISTRICT", viewModel.district.value)
+                bundle.putParcelable("SUBDISTRICT", viewModel.subDistrict.value)
+                intent.putExtra("BUNDLE", bundle)
+                startActivityForResult(intent, 33)
                 viewModel.onClickToSearchSuccess()
             }
         })
