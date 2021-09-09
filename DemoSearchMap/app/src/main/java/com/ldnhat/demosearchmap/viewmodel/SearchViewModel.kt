@@ -206,6 +206,7 @@ class SearchViewModel : ViewModel() {
             _districtCountryDetail.postValue(null)
             _subDistrictCountryDetail.postValue(null)
             _provinceCode.postValue(countryDetail.code)
+            _districtCode.postValue(null)
         }else if (type == Type.DISTRICT){
             rxDistrictCountryDetail.onNext(countryDetail)
             _subDistrictCountryDetail.postValue(null)
@@ -218,7 +219,17 @@ class SearchViewModel : ViewModel() {
     fun getCountryDetail(province : CountryDetail, district : CountryDetail, subDistrict : CountryDetail){
         _provinceCountryDetail.postValue(province)
         _districtCountryDetail.postValue(district)
+        _provinceCode.postValue(province.code)
         _subDistrictCountryDetail.postValue(subDistrict)
+        _districtCode.postValue(district.code)
+    }
+
+    fun clearProvinceCode(){
+        _provinceCode.postValue(null)
+    }
+
+    fun clearDistrictCode(){
+        _districtCode.postValue(null)
     }
 
     override fun onCleared() {

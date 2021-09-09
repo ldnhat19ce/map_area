@@ -34,6 +34,7 @@ class FragmentCountry : DialogFragment() {
         bundle?.let {
             type = it.getParcelable("TYPE")!!
             code = it.getString("CODE").toString()
+            println("code: "+code)
             //viewModel.setType(type)
         }
 

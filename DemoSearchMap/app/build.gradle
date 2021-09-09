@@ -112,5 +112,10 @@ dependencies {
     // https://mvnrepository.com/artifact/com.google.guava/guava
     implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-jre'
 
-
+    implementation "io.insert-koin:koin-core:$koin_version"
+    testImplementation "io.insert-koin:koin-test:$koin_version"
+    implementation "io.insert-koin:koin-android:$koin_version"
+    implementation "io.insert-koin:koin-android-compat:$koin_version"
+    implementation "io.insert-koin:koin-androidx-workmanager:$koin_version"
+    implementation "io.insert-koin:koin-androidx-compose:$koin_version"
 }

@@ -11,14 +11,17 @@ import com.ldnhat.demosearchmap.model.CountryDetail
 import com.ldnhat.demosearchmap.ui.search.SearchActivity
 import com.ldnhat.demosearchmap.viewmodel.HomeViewModel
 import com.ldnhat.demosearchmap.viewmodel.HomeViewModelFactory
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import vn.map4d.map.core.Map4D
 import vn.map4d.map.core.OnMapReadyCallback
 
 class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
+//
+//    private val viewModel by lazy {
+//        ViewModelProvider(this, HomeViewModelFactory(this.application)).get(HomeViewModel::class.java)
+//    }
 
-    private val viewModel by lazy {
-        ViewModelProvider(this, HomeViewModelFactory(this.application)).get(HomeViewModel::class.java)
-    }
+    private val viewModel:HomeViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

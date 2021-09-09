@@ -4,18 +4,21 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ldnhat.demosearchmap.R
 import com.ldnhat.demosearchmap.databinding.ActivitySearchBinding
 import com.ldnhat.demosearchmap.model.CountryDetail
 import com.ldnhat.demosearchmap.viewmodel.SearchViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchActivity : AppCompatActivity(), UpdateCountry {
 
-    private val viewModel by lazy{
-        ViewModelProvider(this).get(SearchViewModel::class.java)
-    }
+//    private val viewModel by lazy{
+//        ViewModelProvider(this).get(SearchViewModel::class.java)
+//    }
+    private val viewModel: SearchViewModel by viewModel()
 
     private lateinit var binding:ActivitySearchBinding
 
@@ -28,6 +31,7 @@ class SearchActivity : AppCompatActivity(), UpdateCountry {
         binding.lifecycleOwner = this
 
         getDataFromHome()
+        handleStateTextInput()
 
         viewModel.backClick.observe(this, {
             if (it){
@@ -37,7 +41,7 @@ class SearchActivity : AppCompatActivity(), UpdateCountry {
         })
 
         showCountryDetail()
-        handleStateTextInput()
+
 
         viewModel.stateButton.observe(this, {
             if (it){
@@ -70,7 +74,8 @@ class SearchActivity : AppCompatActivity(), UpdateCountry {
         }
 
         viewModel.stateTextInputDistrict.observe(this, {
-            if (it){
+            println("state district: "+it)
+            if (it) {
                 binding.textDistrict.setOnClickListener {
                     val fragmentCountry = FragmentCountry()
 
@@ -84,7 +89,9 @@ class SearchActivity : AppCompatActivity(), UpdateCountry {
         })
 
         viewModel.stateTextInputSubDistrict.observe(this, {
-            if (it){
+            println("state subdistrict: " + it)
+            if (it) {
+                binding.textSubDistrict.isEnabled = true
                 binding.textSubDistrict.setOnClickListener {
                     val fragmentCountry = FragmentCountry()
 
@@ -93,15 +100,20 @@ class SearchActivity : AppCompatActivity(), UpdateCountry {
                     bundle.putString("CODE", viewModel.districtCode.value)
                     fragmentCountry.arguments = bundle
                     fragmentCountry.show(supportFragmentManager, null)
+
                 }
+            } else {
+                binding.textSubDistrict.isEnabled = false
+                println("state disble")
             }
 
         })
     }
 
     private fun handleStateTextInput(){
-        viewModel.provinceCountryDetail.observe(this, {
-            if (it == null){
+
+        viewModel.provinceCode.observe(this, {
+            if (it.isNullOrEmpty()){
                 viewModel.onStateTextInputProvinceVisible()
                 viewModel.onStateTextInputDistrictDisable()
                 viewModel.onStateTextInputSubDistrictDisable()
@@ -112,11 +124,11 @@ class SearchActivity : AppCompatActivity(), UpdateCountry {
             }
         })
 
-        viewModel.districtCountryDetail.observe(this, {
-            if (it != null) {
-                viewModel.onStateTextInputSubDistrictVisible()
-            } else {
+        viewModel.districtCode.observe(this, {
+            if (it.isNullOrEmpty()) {
                 viewModel.onStateTextInputSubDistrictDisable()
+            } else {
+                viewModel.onStateTextInputSubDistrictVisible()
             }
         })
     }

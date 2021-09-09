@@ -68,7 +68,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app){
             }else if (zProvince.id != null && zDistrict.id != null && zSubDistrict.id == null){
                 "${zDistrict.name}, ${zProvince.name}"
             }else{
-                "${zProvince.name}, ${zDistrict.name}, ${zSubDistrict.name}"
+                "${zSubDistrict.name}, ${zDistrict.name}, ${zProvince.name}"
             }
         }.subscribe ({
             println("test: $it")
@@ -94,10 +94,12 @@ class HomeViewModel(app: Application) : AndroidViewModel(app){
             rxProvince.onNext(province)
             rxDistrict.onNext(district)
             rxSubDistrict.onNext(subDistrict)
+
         }
         _province.value = province
         _district.value = district
         _subDistrict.value = subDistrict
+
     }
 
     private fun onButtonSearchClick(){
