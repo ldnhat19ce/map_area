@@ -4,21 +4,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.Nullable
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.ViewModelProvider
 import com.ldnhat.demosearchmap.R
 import com.ldnhat.demosearchmap.adapter.CountryAdapter
 import com.ldnhat.demosearchmap.adapter.CountryListener
 import com.ldnhat.demosearchmap.databinding.FragmentSearchBinding
 import com.ldnhat.demosearchmap.viewmodel.CountryViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class FragmentCountry : DialogFragment() {
 
-    private val viewModel  by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        ViewModelProvider(this).get(CountryViewModel::class.java)
-    }
+    private val viewModel : CountryViewModel by viewModel()
 
     private lateinit var binding:FragmentSearchBinding
     private lateinit var type : Type

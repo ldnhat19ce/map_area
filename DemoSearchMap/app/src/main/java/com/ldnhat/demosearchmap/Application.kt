@@ -2,6 +2,9 @@ package com.ldnhat.demosearchmap
 
 import android.app.Application
 import android.content.Context
+import com.ldnhat.demosearchmap.di.countryApiModule
+import com.ldnhat.demosearchmap.di.netModule
+import com.ldnhat.demosearchmap.di.repositoryModule
 import com.ldnhat.demosearchmap.di.viewModelModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -15,7 +18,7 @@ class Application : Application() {
         startKoin {
             androidContext(this@Application)
             androidLogger(Level.DEBUG)
-            modules(listOf(viewModelModule))
+            modules(listOf(viewModelModule, repositoryModule, countryApiModule, netModule))
             allowOverride(true)
         }
     }

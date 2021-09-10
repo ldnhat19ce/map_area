@@ -57,3 +57,19 @@ fun editTextListener(editText: EditText, subject: BehaviorSubject<CharSequence>)
         }
     })
 }
+
+@BindingAdapter("visibleGone")
+fun showHide(view: View, show: Boolean){
+    view.visibility = if (show) View.VISIBLE else View.GONE
+}
+
+@BindingAdapter("visibleText")
+fun showText(view: View, show : String?){
+    show?.let {
+        if (it.isNotBlank()){
+            view.visibility = View.VISIBLE
+        }else{
+            view.visibility = View.GONE
+        }
+    }
+}

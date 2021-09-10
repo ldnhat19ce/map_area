@@ -15,9 +15,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchActivity : AppCompatActivity(), UpdateCountry {
 
-//    private val viewModel by lazy{
-//        ViewModelProvider(this).get(SearchViewModel::class.java)
-//    }
     private val viewModel: SearchViewModel by viewModel()
 
     private lateinit var binding:ActivitySearchBinding

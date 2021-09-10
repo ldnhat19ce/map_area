@@ -2,16 +2,16 @@ package com.ldnhat.demosearchmap.repository
 
 import com.ldnhat.demosearchmap.model.ApiResponse
 import com.ldnhat.demosearchmap.model.CountryDetail
-import com.ldnhat.demosearchmap.network.CountryService
+import com.ldnhat.demosearchmap.network.CountryApiService
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.subjects.ReplaySubject
 
-class CountryRepositoryImpl : CountryRepository {
+class CountryRepositoryImpl(private val countryApiService: CountryApiService) : CountryRepository {
 
     override fun findAllProvince(compositeDisposable: CompositeDisposable): ReplaySubject<Resource<ApiResponse<MutableList<CountryDetail>>>> {
         return object : NetworkBoundResource<ApiResponse<MutableList<CountryDetail>>, ApiResponse<MutableList<CountryDetail>>>(){
-            override fun createCall(): Single<ApiResponse<MutableList<CountryDetail>>> = CountryService.countryApiService.findAllProvince()
+            override fun createCall(): Single<ApiResponse<MutableList<CountryDetail>>> = countryApiService.findAllProvince()
         }.handleSubject()
     }
 
@@ -20,7 +20,7 @@ class CountryRepositoryImpl : CountryRepository {
         provinceCode: String
     ): ReplaySubject<Resource<ApiResponse<MutableList<CountryDetail>>>> {
         return object : NetworkBoundResource<ApiResponse<MutableList<CountryDetail>>, ApiResponse<MutableList<CountryDetail>>>(){
-            override fun createCall(): Single<ApiResponse<MutableList<CountryDetail>>> = CountryService.countryApiService.findAllDistrict(provinceCode)
+            override fun createCall(): Single<ApiResponse<MutableList<CountryDetail>>> = countryApiService.findAllDistrict(provinceCode)
         }.handleSubject()
     }
 
@@ -29,7 +29,7 @@ class CountryRepositoryImpl : CountryRepository {
         districtCode: String
     ): ReplaySubject<Resource<ApiResponse<MutableList<CountryDetail>>>> {
         return object : NetworkBoundResource<ApiResponse<MutableList<CountryDetail>>, ApiResponse<MutableList<CountryDetail>>>(){
-            override fun createCall(): Single<ApiResponse<MutableList<CountryDetail>>> = CountryService.countryApiService.findAllSubDistrict(districtCode)
+            override fun createCall(): Single<ApiResponse<MutableList<CountryDetail>>> = countryApiService.findAllSubDistrict(districtCode)
         }.handleSubject()
     }
 

@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModel
 import com.ldnhat.demosearchmap.model.ApiResponse
 import com.ldnhat.demosearchmap.model.CountryDetail
 import com.ldnhat.demosearchmap.repository.CountryRepository
-import com.ldnhat.demosearchmap.repository.CountryRepositoryImpl
 import com.ldnhat.demosearchmap.repository.Resource
+import com.ldnhat.demosearchmap.repository.Status
 import com.ldnhat.demosearchmap.ui.search.Type
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -16,12 +16,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 import org.apache.commons.lang3.StringUtils
-import java.lang.Exception
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.jvm.internal.Intrinsics
 
-class CountryViewModel : ViewModel() {
+class CountryViewModel(private val repository : CountryRepository) : ViewModel() {
 
     private val closeButtonClick = PublishSubject.create<Boolean>()
 
@@ -31,8 +27,6 @@ class CountryViewModel : ViewModel() {
     get() = _closeButtonClick
 
     private val compositeDisposable = CompositeDisposable()
-
-    private val repository: CountryRepository = CountryRepositoryImpl()
 
     private var typeOfCountry = PublishSubject.create<Type>()
 
@@ -55,10 +49,56 @@ class CountryViewModel : ViewModel() {
     private val _districtCode = MutableLiveData<String>()
     val rxSearchCountryDetail = BehaviorSubject.create<CharSequence>()
 
+    private val rxLoadingState = PublishSubject.create<Boolean>()
+
+    private val _loadingState = MutableLiveData<Boolean>()
+    val loadingState:LiveData<Boolean>
+    get() = _loadingState
+
+    private val rxSuccessState = PublishSubject.create<Boolean>()
+
+    private val _successState = MutableLiveData<Boolean>()
+    val successState:LiveData<Boolean>
+        get() = _successState
+
+    private val rxErrorState = PublishSubject.create<String>()
+
+    private val _errorState = MutableLiveData<String>()
+    val errorState:LiveData<String>
+        get() = _errorState
+
     init {
         handleTypeOfCountry()
         onCloseButtonClick()
         addSearchCountryDetail()
+        addLoadingState()
+        addErrorState()
+        addSuccessState()
+        _loadingState.value = false
+    }
+
+    private fun addLoadingState(){
+        rxLoadingState.observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
+            .subscribe {
+                _loadingState.postValue(it)
+            }.addTo(compositeDisposable)
+    }
+
+    private fun addErrorState(){
+        rxErrorState.observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
+            .subscribe {
+                _errorState.postValue(it)
+            }.addTo(compositeDisposable)
+    }
+
+    private fun addSuccessState(){
+        rxSuccessState.observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
+            .subscribe {
+                _successState.postValue(it)
+            }.addTo(compositeDisposable)
     }
 
     private fun addSearchCountryDetail(){
@@ -87,15 +127,17 @@ class CountryViewModel : ViewModel() {
 
     }
 
+
     private fun filterArea(keyword : CharSequence){
         val areaFilter:MutableList<CountryDetail> = ArrayList()
 
         if (keyword.isNotBlank()){
             countryDetail.value?.let {
                 for (countryDetail : CountryDetail in it){
-                    if (StringUtils.contains(StringUtils.toRootLowerCase(countryDetail.name),
-                            StringUtils.toRootLowerCase(keyword.toString()))){
-                        println(countryDetail.name)
+                    val stringAccent:String = StringUtils.stripAccents(countryDetail.name)
+                    if (StringUtils.contains(StringUtils.toRootLowerCase(stringAccent), StringUtils.toRootLowerCase(keyword.toString()))
+                        || StringUtils.contains(StringUtils.toRootLowerCase(countryDetail.name), StringUtils.toRootLowerCase(keyword.toString()))
+                    ){
                         areaFilter.add(countryDetail)
                     }
                 }
@@ -127,8 +169,10 @@ class CountryViewModel : ViewModel() {
     }
 
     private fun handleProvince(resource : Resource<ApiResponse<MutableList<CountryDetail>>>){
+        handleState(resource)
         val countryDetail: ApiResponse<MutableList<CountryDetail>>? = resource.data
         println("status: "+resource.status)
+
         if (countryDetail?.result != null){
             _countryDetail.value = countryDetail.result
             _countryDetailSearch.value = countryDetail.result
@@ -146,6 +190,7 @@ class CountryViewModel : ViewModel() {
     }
 
     private fun handleDistrict(resource: Resource<ApiResponse<MutableList<CountryDetail>>>){
+        handleState(resource)
         val districts:ApiResponse<MutableList<CountryDetail>>? = resource.data
         if (districts?.result != null){
             _countryDetail.value = districts.result
@@ -164,6 +209,7 @@ class CountryViewModel : ViewModel() {
     }
 
     private fun handleSubDistrict(resource: Resource<ApiResponse<MutableList<CountryDetail>>>){
+        handleState(resource)
         val subDistricts:ApiResponse<MutableList<CountryDetail>>? = resource.data
         if (subDistricts?.result != null){
             _countryDetail.value = subDistricts.result
@@ -188,13 +234,37 @@ class CountryViewModel : ViewModel() {
     }
 
     private fun handleTypeOfCountry(type: String){
-        if (type == Type.PROVINCE.type){
-            this.getAllProvince()
-        }else if (type == Type.DISTRICT.type){
-            _provinceCode.value?.let { getAllDistrict(it) }
-        }else if (type == Type.SUBDISTRICT.type){
-            _districtCode.value?.let {
-                getAllSubDistrict(it)
+        when (type) {
+            Type.PROVINCE.type -> {
+                this.getAllProvince()
+            }
+            Type.DISTRICT.type -> {
+                _provinceCode.value?.let { getAllDistrict(it) }
+            }
+            Type.SUBDISTRICT.type -> {
+                _districtCode.value?.let {
+                    getAllSubDistrict(it)
+                }
+            }
+        }
+    }
+
+    private fun handleState(resource: Resource<ApiResponse<MutableList<CountryDetail>>>){
+        when (resource.status) {
+            Status.LOADING -> {
+                rxLoadingState.onNext(true)
+                rxErrorState.onNext("")
+                rxSuccessState.onNext(false)
+            }
+            Status.SUCCESS -> {
+                rxLoadingState.onNext(false)
+                rxErrorState.onNext("")
+                rxSuccessState.onNext(true)
+            }
+            Status.ERROR -> {
+                rxLoadingState.onNext(false)
+                rxErrorState.onNext(resource.message)
+                rxSuccessState.onNext(false)
             }
         }
     }
